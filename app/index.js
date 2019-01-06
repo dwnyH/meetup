@@ -11,12 +11,12 @@ import { debounce } from 'lodash';
 
 let lat;
 let lon;
-let groupInfos = [];
+let eventPositions = [];
 
 var mapContainer = document.getElementById('map'); // 지도를 표시할 div
 var mapOption = {
         center: new daum.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-        level: 3 // 지도의 확대 레벨
+        level: 9 // 지도의 확대 레벨
     };
 
 var map = new daum.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
@@ -32,25 +32,28 @@ var marker = new daum.maps.Marker({
 var geocoder = new daum.maps.services.Geocoder();
 
 
+
 // 마커가 지도 위에 표시되도록 설정합니다
 marker.setMap(map);
 
-// 마커가 드래그 가능하도록 설정합니다
-marker.setDraggable(true);
-
 daum.maps.event.addListener(map, 'click', function(mouseEvent) {
+  debugger;
 
   var latlng = mouseEvent.latLng;
   marker.setPosition(latlng);
 
   lat = latlng.getLat();
   lon = latlng.getLng();
+  console.log(lat, lon);
+  debugger;
 
+  // requestMeetup(result[0].y, result[0].x).then(console.log(data.events)
+  //   , (err) => alert(err));
 
   requestMeetup(lat, lon).then(data => {
-    //console.log(data);
+    debugger;
+    console.log(data.data.events);
   }, (err) => alert(err));
-
 
 });
 
@@ -60,9 +63,11 @@ function requestMeetup(lat, lon) {
       url: `https://api.meetup.com/find/upcoming_events?photo-host=public&page=20&sig_id=271258437&lon=${lon}&lat=${lat}&sig=c0b195f994d2d658b2987f09644e29d9c01e4a56`,
       dataType: 'jsonp',
       success: function(data) {
+        debugger;
         resolve(data);
       },
       error: function(error) {
+        debugger;
         reject(error);
       },
     });
@@ -117,19 +122,26 @@ function showEvents(data) {
   let events = data.data.events;
 
   for (let i = 0; i < events.length; i++) {
-    let groupInfo = {};
-    groupInfo.eventId = events[i].id;
-    groupInfo.urlName = events[i].group.urlname;
-    groupInfos.push(groupInfo);
-    debugger;
+    let eventPosition = {};
+    eventPosition.title = events[i].name;
+    eventPosition.latlng = new daum.maps.LatLng(events[i].group.lat, events[i].group.lon);
+    eventPositions.push(eventPosition);
 
-    requestHostInfo(events[i].id, events[i].group.urlname).then(data => console.log(data));
+    // if (events[i].venue) {
+    //   console.log(events[i].venue)
+    // }
+
+    requestHostInfo(events[i].id, events[i].group.urlname).then(
+      //data => console.log(data)
+    );
   }
+
+  markEventsOnMap(eventPositions);
 }
 
 
 function requestHostInfo(id, urlname) {
-  debugger;
+
   return new Promise(function(resolve, reject) {
     $.ajax({
       url: `https://api.meetup.com/${urlname}/events/${id}/hosts?&sign=true&photo-host=public`,
@@ -138,6 +150,51 @@ function requestHostInfo(id, urlname) {
         resolve(data);
       },
       error: function(error) {
+        reject(error);
+      },
+    });
+  })
+}
+
+function markEventsOnMap(eventPositions) {
+  debugger;
+
+  var eventMarkerImageSrc = "http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
+
+  for (var i = 0; i < eventPositions.length; i ++) {
+      // 마커 이미지의 이미지 크기 입니다
+      var eventMarkerImageSize = new daum.maps.Size(24, 35);
+      // 마커 이미지를 생성합니다
+      var eventMarkerImage = new daum.maps.MarkerImage(eventMarkerImageSrc, eventMarkerImageSize);
+      // 마커를 생성합니다
+      var eventMarker = new daum.maps.Marker({
+          map: map, // 마커를 표시할 지도
+          position: eventPositions[i].latlng, // 마커를 표시할 위치
+          title : eventPositions[i].title, // 마커의 타이틀, 마커에 마우스를 올리면 타이틀이 표시됩니다
+          image : eventMarkerImage // 마커 이미지
+      });
+  }
+}
+
+
+
+requestTopicInfo(18).then(
+  data => console.log(data)
+);
+
+function requestTopicInfo(categoryId) {
+debugger;
+  return new Promise(function(resolve, reject) {
+    $.ajax({
+      //`https://api.meetup.com/find/groups?photo-host=public&zip=06676&page=20&country=%EB%8C%80%ED%95%9C%EB%AF%BC%EA%B5%AD&sig_id=271258437&topic_id=${topicId}&sig=c75613b5c7c3b1bd426372613f60b484feacd436`
+      url: `https://api.meetup.com/find/groups?photo-host=public&page=50&sig_id=271258437&category=+${categoryId}&sig=d2b48db9d5d1ba847e34aab51fd0d8406dae2b62&key=17214911107c1b1a3412d223c7a111e`,
+      dataType: 'jsonp',
+      success: function(data) {
+        debugger;
+        resolve(data);
+      },
+      error: function(error) {
+        debugger;
         reject(error);
       },
     });
