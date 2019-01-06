@@ -1,15 +1,99 @@
 // Apply a natural box layout model to all elements
 // but allowing components to change
 // http://www.paulirish.com/2012/box-sizing-border-box-ftw/
-html, body {
+html, body{
     box-sizing: border-box;
-    background-color: pink;
 }
 *, *:before, *:after {
     box-sizing: inherit;
 }
-#map {
-    height: 400px;  /* The height is 400 pixels */
-    width: 100%;  /* The width is the width of the web page */
+// body {
+//     // display: grid;
+//     // grid-template-areas
+//     // :'header'
+//     //  'menu'
+//     //  'main'
+//     //  'main'
+//     //  'footer';
+//    // grid-auto-rows: 200px;
+// }
+header {
+    grid-area: header;
+    height: 100px;
+}
+.categories {
+    grid-area: menu;
 }
 
+.main {
+    grid-area: main;
+    display: grid;
+
+    // grid-template-areas: 'content sidebar';
+    // grid-template-columns: min-content;
+}
+
+.results {
+    //width: 800px;
+    // grid-area: content;
+    display: grid;
+    grid-auto-flow: columns;
+    grid-template-columns: repeat(2, 1fr);
+    justify-items: center;
+    grid-gap: 20px;
+    margin-top: 20px;
+    .event {
+        width: 500px;
+    }
+}
+
+.hostImg {
+    width: 50px; 
+    height: 50px;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 50%;
+}
+
+.search {
+    //grid-area: sidebar;
+    display: flex;
+    flex-direction: column;
+}
+
+footer {
+    grid-area: footer;
+}
+input {
+    height: 40px;
+}
+.meetingImg {
+    width: 500px;
+    height: 300px;
+}
+
+.imgWrapper {
+    position: relative;
+    text-align: center;
+}
+
+.rsvp{
+    position: relative;
+    color: rgb(253, 251, 238);
+    top: -40px;
+    left: 400px;
+    font-size: 15px;
+    background-color: rgba(0, 0, 0, 0.8);
+    width: 100px;
+    height: 20px;
+}
+
+.hostWrapper {
+    display: inline-block;
+    width : 200px;
+}
+
+.contentWrapper {
+    display: inline-block;
+    width : 300px;
+}
