@@ -13,19 +13,23 @@ let lat;
 let lon;
 let eventPositions = [];
 let hostInfos = [];
+let bookMarks = [];
 
-var mapContainer = document.getElementById('map'); // 지도를 표시할 div
+const bookmarksinStorage = JSON.parse(localStorage.getItem('bookMark'));
+
+if (bookmarksinStorage.length) {
+  showBookmarks(0);
+}
+
+var mapContainer = document.getElementById('map');
 var mapOption = {
-        center: new daum.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-        level: 9 // 지도의 확대 레벨
+    center: new daum.maps.LatLng(33.450701, 126.570667),
+    level: 9 // 지도의 확대 레벨
 };
 
-var map = new daum.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
-
-// 마커가 표시될 위치입니다
+var map = new daum.maps.Map(mapContainer, mapOption);
 var markerPosition = new daum.maps.LatLng(33.450701, 126.570667);
 
-// 마커를 생성합니다
 var marker = new daum.maps.Marker({
     position: markerPosition
 });
@@ -45,8 +49,6 @@ function relayout() {
 
 resizeMap();
 relayout();
-
-// 마커가 지도 위에 표시되도록 설정합니다
 marker.setMap(map);
 
 daum.maps.event.addListener(map, 'click', function(mouseEvent) {
@@ -58,7 +60,6 @@ daum.maps.event.addListener(map, 'click', function(mouseEvent) {
   lat = latlng.getLat();
   lon = latlng.getLng();
   console.log(lat, lon);
-  //debugger;
   requestMeetingInfos(lat, lon).then(requestAdditionalInfos);
 });
 
@@ -83,35 +84,27 @@ let showSearchedSpot = _.debounce(
   function (event) {
     let inputKey = event.keyCode;
     if (inputKey === 13) {
-      //console.log(searchInput.value);
-      geocoder.addressSearch(searchInput.value, abc);
+      geocoder.addressSearch(searchInput.value, viewMap);
     }
   }, 300);
 
 searchInput.addEventListener('keydown', showSearchedSpot);
 
-function abc(result, status) {
+function viewMap(result, status) {
 
-  // 정상적으로 검색이 완료됐으면
    if (status === daum.maps.services.Status.OK) {
 
       var coords = new daum.maps.LatLng(result[0].y, result[0].x);
-
-      // 결과값으로 받은 위치를 마커로 표시합니다
       var marker = new daum.maps.Marker({
           map: map,
           position: coords
       });
 
-
-      // 인포윈도우로 장소에 대한 설명을 표시합니다
       var infowindow = new daum.maps.InfoWindow({
           content: `<div style="width:150px;text-align:center;padding:6px 0;">${searchInput.value}</div>`
       });
 
       infowindow.open(map, marker);
-
-      // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
       map.setCenter(coords);
 
       requestMeetingInfos(result[0].y, result[0].x).then(requestAdditionalInfos);
@@ -120,11 +113,10 @@ function abc(result, status) {
 
 
 function requestAdditionalInfos(data) {
-  //console.log(data.data.events);
   let events = data.data.events;
+  hostInfos = [];
 
   events.forEach(function(event) {
-    //requestHostInfo(event.id, event.group.urlname)
     const hostInfo = requestHostInfo(event.id, event.group.urlname);
 
     function requestHostInfo(id, urlname) {
@@ -150,11 +142,17 @@ function requestAdditionalInfos(data) {
   function showMeetingEvents(data) {
     let hostInformations = data;
     let results = document.querySelector('.results');
+    debugger;
+    if (results.hasChildNodes()) {
+      while (results.firstChild) {
+        results.removeChild(results.firstChild);
+      }
+    }
 
     console.log('events :',events);
     console.log(hostInformations);
 
-    for (let i = 0; i < events.length; i++) {
+    for (let j = 0; j < 10; j++) {
 
       let eventList = document.createElement('div');
       let eventName = document.createElement('div');
@@ -167,6 +165,8 @@ function requestAdditionalInfos(data) {
       let imgWrapper = document.createElement('div');
       let contentWrapper = document.createElement('div');
       let hostWrapper = document.createElement('div');
+      let bookMarkWrapper = document.createElement('span');
+      let bulbIcon = '<i class="far fa-lightbulb"></i>';
 
       eventList.classList.add('event');
       eventName.classList.add('eventName');
@@ -176,47 +176,88 @@ function requestAdditionalInfos(data) {
       hostName.classList.add('hostName');
       hostImg.classList.add('hostImg');
       meetingImg.classList.add('meetingImg');
+      imgWrapper.classList.add('imgWrapper');
       contentWrapper.classList.add('contentWrapper');
       hostWrapper.classList.add('hostWrapper');
+      bookMarkWrapper.classList.add('bulbIcon');
 
-      eventName.textContent = events[i].name;
-      groupName.textContent = events[i].group.name;
-      eventDate.textContent = `${events[i].local_date} | ${events[i].local_time}`;
-      rsvp.textContent = `${events[i].yes_rsvp_count}명 참여신청`;
-      hostName.textContent = hostInformations[i].data[0].name;
-      hostImg.src = hostInformations[i].data[0].photo.photo_link;
+      eventName.textContent = events[j].name;
+      groupName.textContent = events[j].group.name;
+      eventDate.textContent = `${events[j].local_date} | ${events[j].local_time}`;
+      rsvp.textContent = `${events[j].yes_rsvp_count}명 참여신청`;
+      hostName.textContent = hostInformations[j].data[0].name;
+      hostImg.src = hostInformations[j].data[0].photo.photo_link;
+      bookMarkWrapper.innerHTML = bulbIcon;
 
-      if(events[i].featured_photo) {
-        meetingImg.src = events[i].featured_photo.photo_link;
+      if(events[j].featured_photo) {
+        meetingImg.src = events[j].featured_photo.photo_link;
       } else {
         meetingImg.src = "https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80";
       }
 
-      imgWrapper.appendChild(meetingImg);
-      imgWrapper.appendChild(rsvp);
+      bookMarkWrapper.addEventListener('click', addInBookmark);
 
+      imgWrapper.appendChild(meetingImg);
+      imgWrapper.appendChild(bookMarkWrapper);
+      imgWrapper.appendChild(rsvp);
       hostWrapper.appendChild(hostImg);
       hostWrapper.appendChild(hostName);
       contentWrapper.appendChild(eventName);
-      // contentWrapper.appendChild(imgWrapper);
       contentWrapper.appendChild(groupName);
       contentWrapper.appendChild(eventDate);
-      //eventList.appendChild(meetingImg);
-      // eventList.appendChild(eventName);
-      // eventList.appendChild(imgWrapper);
-      // eventList.appendChild(groupName);
-      // eventList.appendChild(eventDate);
-      // eventList.appendChild(rsvp);
       eventList.appendChild(imgWrapper);
       eventList.appendChild(hostWrapper);
       eventList.appendChild(contentWrapper);
       results.appendChild(eventList);
-
     }
   }
 }
 
+function addInBookmark(event) {
+  debugger;
+  console.log(event.currentTarget);
+  const selectedArea = event.currentTarget.parentNode.parentNode;
+  const selectedEventName = selectedArea.children[2].children[1].innerText;
+  const selectedEventImg = selectedArea.children[0].children[0].getAttribute('src');
+  debugger;
+  let bookMark = {'eventName' : selectedEventName, 'eventImg' : selectedEventImg};
+  let bookMarks = JSON.parse(localStorage.getItem('bookMark'));
+  let bookMarkLength;
 
+  if (!bookMarks) {
+    bookMarks = [];
+  } else {
+    bookMarkLength = bookMarks.length;
+  }
+  bookMarks.push(bookMark);
+  localStorage.setItem("bookMark", JSON.stringify(bookMarks));
+  showBookmarks(bookMarkLength);
+  // console.log(localStorage.getItem('bookMark'));
+}
+
+function showBookmarks(selectedbookMark) {
+  const bookmarkStorage = document.querySelector('.bookmarkList')
+  const chosenEvents = JSON.parse(localStorage.getItem('bookMark'));
+  let newBookmarkIndex;
+
+  if (selectedbookMark) {
+    newBookmarkIndex = selectedbookMark;
+  } else {
+    newBookmarkIndex = 0;
+  }
+
+  for (let i = newBookmarkIndex; i < chosenEvents.length; i++) {
+    const chosenEvent = document.createElement('div');
+    const chosenEventImg = document.createElement('img');
+
+    chosenEvent.classList.add('chosenEvent');
+    chosenEventImg.classList.add('chosenEventImg');
+    chosenEventImg.src = chosenEvents[i].eventImg;
+
+    chosenEvent.appendChild(chosenEventImg);
+    bookmarkStorage.appendChild(chosenEvent);
+  }
+}
 
 // function requestHostInfo(id, urlname) {
 
