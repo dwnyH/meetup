@@ -3,20 +3,13 @@
 // http://www.paulirish.com/2012/box-sizing-border-box-ftw/
 html, body{
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 *, *:before, *:after {
     box-sizing: inherit;
 }
-// body {
-//     // display: grid;
-//     // grid-template-areas
-//     // :'header'
-//     //  'menu'
-//     //  'main'
-//     //  'main'
-//     //  'footer';
-//    // grid-auto-rows: 200px;
-// }
+
 header {
     grid-area: header;
     height: 100px;
@@ -34,8 +27,6 @@ header {
 }
 
 .results {
-    //width: 800px;
-    // grid-area: content;
     display: grid;
     grid-auto-flow: columns;
     grid-template-columns: repeat(2, 1fr);
@@ -57,9 +48,10 @@ header {
 }
 
 .search {
-    //grid-area: sidebar;
+    background-color: #1f1f21;
     display: flex;
     flex-direction: column;
+    padding: 20px 40px;
 }
 
 footer {
@@ -68,6 +60,7 @@ footer {
 input {
     height: 40px;
     margin-bottom: 20px;
+    border: none;
 }
 .meetingImg {
     width: 500px;
@@ -82,13 +75,13 @@ input {
 
 .rsvp{
     position: relative;
-    color: rgb(253, 251, 238);
+    color: #fdfbee;
     top: -120px;
-    left: 400px;
-    font-size: 15px;
+    left: 350px;
+    font-size: 17px;
     background-color: rgba(0, 0, 0, 0.8);
-    width: 100px;
-    height: 20px;
+    width: 150px;
+    height: 25px;
 }
 
 .hostWrapper {
@@ -101,12 +94,26 @@ input {
     width : 300px;
 }
 
-.bulbIcon {
+.markIcon {
     position: relative;
-    font-size: 50px;
+    font-size: 45px;
     top: -300px;
-    left: 200px;
-    color: whit;
+    left: 220px;
+    color: rgba(230, 225, 202, 0.8);
+}
+
+.markIcon :hover {
+    cursor: pointer;
+}
+
+.marked {
+    color: rgb(228, 216, 107);
+}
+
+.bookmarks {
+    margin: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .bookmarkMenu {
@@ -114,14 +121,51 @@ input {
     .bookmarkButton, .bookmarkText {
         display: inline-block;
         font-size: 20px;
+        margin-left: 10px;
     }
 }
+
 .bookmarkList {
-    display: grid;
-    grid-template-columns: repeat(5,1fr);
-    align-items: center;
+    display: flex;
+    overflow-x: scroll;
+    width: 1200px;
+    margin-top: 20px;
+    overflow: hidden;
 }
+
+.bookmarkListWrapper {
+    height: 300px;
+    margin-top: 30px;
+
+    .savedText {
+        margin-left: 10px;
+    }
+}
+
 .chosenEventImg {
     width: 200px;
     height: 120px;
+    border-radius: 6px;
+}
+.chosenEventTitle {
+    text-align: center;
+    padding-top: 20px;
+    padding-left: 3px;
+}
+.chosenEvent {
+    margin: 10px;
+    height: 300px;
+    width: 250px;
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 1px 1px 10px 2px #e9e8e8;
+}
+.deleteIcon {
+    font-size: 17px;
+    position: relative;
+    left: 190px;
+    top: -10px;
+    width: 20px;
+    cursor: pointer;
 }
