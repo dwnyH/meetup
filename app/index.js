@@ -16,9 +16,12 @@ let hostInfos = [];
 let results;
 let hostInformations;
 let events;
+const mapSearchButton = document.querySelector('.mapSearchButton');
 const bookmarkList = document.querySelector('.bookmarkList');
 const bookmarksinStorage = JSON.parse(localStorage.getItem('bookMark'));
 const searchInput = document.querySelector('.address');
+const bookmarkShowButton = document.querySelector('.bookmarkShowButton');
+const bookmarkListWrapper = document.querySelector('.bookmarkListWrapper');
 const mapContainer = document.getElementById('map');
 const mapOption = {
     center: new daum.maps.LatLng(37.503461, 127.022127),
@@ -35,6 +38,11 @@ function loadDaumMap() {
   resizeMap();
   relayout();
   marker.setMap(map);
+}
+
+function showMapSearchingArea() {
+  const searchingArea = document.querySelector('.search');
+  searchingArea.style.display = 'flex';
 }
 
 function resizeMap() {
@@ -169,7 +177,7 @@ function requestAdditionalInfos(data) {
   });
 
   Promise.all(hostInfos).then(showMeetingEvents).catch(err => console.log(err));
-  markEventsOnMap(eventPositions);
+  //markEventsOnMap(eventPositions);
 
   function showMeetingEvents(data) {
     hostInformations = data;
@@ -225,7 +233,7 @@ function makeEventLists() {
     if(events[j].featured_photo) {
       meetingImg.src = events[j].featured_photo.photo_link;
     } else {
-      meetingImg.src = "https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80";
+      meetingImg.src = "https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80";
     }
 
     bookMarkWrapper.addEventListener('click', addInBookmark);
@@ -328,9 +336,20 @@ function deleteMarkedEvent(event) {
   localStorage.setItem('bookMark', JSON.stringify(allBookmarks));
 }
 
+function concealBookmark(event) {
+  bookmarkListWrapper.classList.toggle('visible');
+  if (bookmarkListWrapper.classList.contains('visible')) {
+    event.target.innerHTML = '∧';
+  } else {
+    event.target.innerHTML = '∨';
+  }
+}
+
 loadDaumMap();
 loadBookmarks();
+mapSearchButton.addEventListener('click', showMapSearchingArea);
 searchInput.addEventListener('keydown', showSearchedSpot);
+bookmarkShowButton.addEventListener('click', concealBookmark);
 
 // function markEventsOnMap(eventPositions) {
 //   //debugger;
