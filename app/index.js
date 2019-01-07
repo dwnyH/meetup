@@ -13,27 +13,29 @@ let lat;
 let lon;
 let eventPositions = [];
 let hostInfos = [];
-
-let bookmarksinStorage = JSON.parse(localStorage.getItem('bookMark'));
-
-if (bookmarksinStorage) {
-  showBookmarks(0);
-}
-
+let results;
+let hostInformations;
+let events;
+const bookmarkList = document.querySelector('.bookmarkList');
+const bookmarksinStorage = JSON.parse(localStorage.getItem('bookMark'));
+const searchInput = document.querySelector('.address');
 const mapContainer = document.getElementById('map');
 const mapOption = {
     center: new daum.maps.LatLng(37.503461, 127.022127),
     level: 13
 };
-
 const map = new daum.maps.Map(mapContainer, mapOption);
 const markerPosition = new daum.maps.LatLng(37.503461, 127.022127);
-
 const marker = new daum.maps.Marker({
     position: markerPosition
 });
-
 const geocoder = new daum.maps.services.Geocoder();
+
+function loadDaumMap() {
+  resizeMap();
+  relayout();
+  marker.setMap(map);
+}
 
 function resizeMap() {
   const mapContainer = document.getElementById('map');
@@ -45,10 +47,6 @@ function resizeMap() {
 function relayout() {
   map.relayout();
 }
-
-resizeMap();
-relayout();
-marker.setMap(map);
 
 daum.maps.event.addListener(map, 'click', function(mouseEvent) {
 
@@ -76,7 +74,45 @@ function requestMeetingInfos(lat, lon) {
   })
 }
 
-const searchInput = document.querySelector('.address');
+function loadBookmarks() {
+  if (bookmarksinStorage) {
+    showBookmarks(0);
+  }
+  bookmarkListDragger();
+}
+
+function bookmarkListDragger() {
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  bookmarkList.addEventListener('mousedown', (event) => {
+      isDown = true;
+      bookmarkList.classList.add('active');
+      startX = event.pageX - bookmarkList.offsetLeft;
+      scrollLeft = bookmarkList.scrollLeft;
+  });
+
+  bookmarkList.addEventListener('mouseleave', () => {
+      isDown = false;
+      bookmarkList.classList.remove('active');
+  });
+
+  bookmarkList.addEventListener('mouseup', () => {
+      isDown = false;
+      bookmarkList.classList.remove('active');
+  });
+
+  bookmarkList.addEventListener('mousemove', (event) => {
+    if (!isDown) {
+      return;
+    }
+    const x = event.pageX - bookmarkList.offsetLeft;
+    const walk = (x - startX) * 3;
+    event.preventDefault();
+    bookmarkList.scrollLeft = scrollLeft - walk;
+  });
+}
 
 const showSearchedSpot = _.debounce(
   function (event) {
@@ -86,33 +122,29 @@ const showSearchedSpot = _.debounce(
     }
   }, 300);
 
-searchInput.addEventListener('keydown', showSearchedSpot);
-
 function viewMap(result, status) {
 
    if (status === daum.maps.services.Status.OK) {
 
-      const coords = new daum.maps.LatLng(result[0].y, result[0].x);
-      const marker = new daum.maps.Marker({
-        map: map,
-        position: coords
-      });
+    const coords = new daum.maps.LatLng(result[0].y, result[0].x);
+    const marker = new daum.maps.Marker({
+      map: map,
+      position: coords
+    });
+    const infowindow = new daum.maps.InfoWindow({
+      content: `<div style="width:150px;text-align:center;padding:6px 0;">${searchInput.value}</div>`
+    });
 
-      const infowindow = new daum.maps.InfoWindow({
-        content: `<div style="width:150px;text-align:center;padding:6px 0;">${searchInput.value}</div>`
-      });
+    infowindow.open(map, marker);
+    map.setCenter(coords);
 
-      infowindow.open(map, marker);
-      map.setCenter(coords);
-
-      requestMeetingInfos(result[0].y, result[0].x).then(requestAdditionalInfos);
+    requestMeetingInfos(result[0].y, result[0].x).then(requestAdditionalInfos);
   }
 }
 
-
 function requestAdditionalInfos(data) {
   debugger;
-  let events = data.data.events;
+  events = data.data.events;
   hostInfos = [];
 
   events.forEach(function(event) {
@@ -134,82 +166,82 @@ function requestAdditionalInfos(data) {
       });
     }
     hostInfos.push(hostInfo);
-  })
+  });
 
   Promise.all(hostInfos).then(showMeetingEvents).catch(err => console.log(err));
   markEventsOnMap(eventPositions);
 
   function showMeetingEvents(data) {
-    let hostInformations = data;
-    let results = document.querySelector('.results');
+    hostInformations = data;
+    results = document.querySelector('.results');
     debugger;
     if (results.hasChildNodes()) {
       while (results.firstChild) {
         results.removeChild(results.firstChild);
       }
     }
+    makeEventLists();
+  }
+}
 
-    console.log('events :',events);
-    console.log(hostInformations);
+function makeEventLists() {
+  for (let j = 0; j < 10; j++) {
 
-    for (let j = 0; j < 10; j++) {
+    let eventList = document.createElement('div');
+    let eventName = document.createElement('div');
+    let groupName = document.createElement('div');
+    let eventDate = document.createElement('div');
+    let rsvp = document.createElement('div');
+    let hostName = document.createElement('div');
+    let hostImg = document.createElement('img');
+    let meetingImg = document.createElement('img');
+    let imgWrapper = document.createElement('div');
+    let contentWrapper = document.createElement('div');
+    let hostWrapper = document.createElement('div');
+    let bookMarkWrapper = document.createElement('span');
+    let markIcon = '<i class="fas fa-bookmark"></i>';
 
-      let eventList = document.createElement('div');
-      let eventName = document.createElement('div');
-      let groupName = document.createElement('div');
-      let eventDate = document.createElement('div');
-      let rsvp = document.createElement('div');
-      let hostName = document.createElement('div');
-      let hostImg = document.createElement('img');
-      let meetingImg = document.createElement('img');
-      let imgWrapper = document.createElement('div');
-      let contentWrapper = document.createElement('div');
-      let hostWrapper = document.createElement('div');
-      let bookMarkWrapper = document.createElement('span');
-      let markIcon = '<i class="fas fa-bookmark"></i>';
+    eventList.classList.add('event');
+    eventName.classList.add('eventName');
+    groupName.classList.add('groupName');
+    eventDate.classList.add('eventDate');
+    rsvp.classList.add('rsvp');
+    hostName.classList.add('hostName');
+    hostImg.classList.add('hostImg');
+    meetingImg.classList.add('meetingImg');
+    imgWrapper.classList.add('imgWrapper');
+    contentWrapper.classList.add('contentWrapper');
+    hostWrapper.classList.add('hostWrapper');
+    bookMarkWrapper.classList.add('markIcon');
 
-      eventList.classList.add('event');
-      eventName.classList.add('eventName');
-      groupName.classList.add('groupName');
-      eventDate.classList.add('eventDate');
-      rsvp.classList.add('rsvp');
-      hostName.classList.add('hostName');
-      hostImg.classList.add('hostImg');
-      meetingImg.classList.add('meetingImg');
-      imgWrapper.classList.add('imgWrapper');
-      contentWrapper.classList.add('contentWrapper');
-      hostWrapper.classList.add('hostWrapper');
-      bookMarkWrapper.classList.add('markIcon');
+    eventName.textContent = events[j].name;
+    groupName.textContent = events[j].group.name;
+    eventDate.textContent = `${events[j].local_date} | ${events[j].local_time}`;
+    rsvp.textContent = `${events[j].yes_rsvp_count}명 참여신청`;
+    hostName.textContent = hostInformations[j].data[0].name;
+    hostImg.src = hostInformations[j].data[0].photo.photo_link;
+    bookMarkWrapper.innerHTML = markIcon;
 
-      eventName.textContent = events[j].name;
-      groupName.textContent = events[j].group.name;
-      eventDate.textContent = `${events[j].local_date} | ${events[j].local_time}`;
-      rsvp.textContent = `${events[j].yes_rsvp_count}명 참여신청`;
-      hostName.textContent = hostInformations[j].data[0].name;
-      hostImg.src = hostInformations[j].data[0].photo.photo_link;
-      bookMarkWrapper.innerHTML = markIcon;
-
-      if(events[j].featured_photo) {
-        meetingImg.src = events[j].featured_photo.photo_link;
-      } else {
-        meetingImg.src = "https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80";
-      }
-
-      bookMarkWrapper.addEventListener('click', addInBookmark);
-
-      imgWrapper.appendChild(meetingImg);
-      imgWrapper.appendChild(bookMarkWrapper);
-      imgWrapper.appendChild(rsvp);
-      hostWrapper.appendChild(hostImg);
-      hostWrapper.appendChild(hostName);
-      contentWrapper.appendChild(eventName);
-      contentWrapper.appendChild(groupName);
-      contentWrapper.appendChild(eventDate);
-      eventList.appendChild(imgWrapper);
-      eventList.appendChild(hostWrapper);
-      eventList.appendChild(contentWrapper);
-      results.appendChild(eventList);
+    if(events[j].featured_photo) {
+      meetingImg.src = events[j].featured_photo.photo_link;
+    } else {
+      meetingImg.src = "https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80";
     }
+
+    bookMarkWrapper.addEventListener('click', addInBookmark);
+
+    imgWrapper.appendChild(meetingImg);
+    imgWrapper.appendChild(bookMarkWrapper);
+    imgWrapper.appendChild(rsvp);
+    hostWrapper.appendChild(hostImg);
+    hostWrapper.appendChild(hostName);
+    contentWrapper.appendChild(eventName);
+    contentWrapper.appendChild(groupName);
+    contentWrapper.appendChild(eventDate);
+    eventList.appendChild(imgWrapper);
+    eventList.appendChild(hostWrapper);
+    eventList.appendChild(contentWrapper);
+    results.appendChild(eventList);
   }
 }
 
@@ -223,8 +255,7 @@ function addInBookmark(event) {
   let bookMarks = JSON.parse(localStorage.getItem('bookMark'));
   let bookMarkLength;
   let saved = false;
-  // let chosenBookmarkEvent = event.target.parentNode.children[2].innerText;
-  // let allBookmarks = JSON.parse(localStorage.getItem('bookMark'));
+
   if (!bookMarks) {
     bookMarks = [];
   } else {
@@ -296,61 +327,51 @@ function deleteMarkedEvent(event) {
   event.target.parentNode.remove();
   localStorage.setItem('bookMark', JSON.stringify(allBookmarks));
 }
-// function requestHostInfo(id, urlname) {
 
+loadDaumMap();
+loadBookmarks();
+searchInput.addEventListener('keydown', showSearchedSpot);
+
+// function markEventsOnMap(eventPositions) {
+//   //debugger;
+
+//   const eventMarkerImageSrc = "http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
+
+//   for (let i = 0; i < eventPositions.length; i ++) {
+
+//       const eventMarkerImageSize = new daum.maps.Size(24, 35);
+//       const eventMarkerImage = new daum.maps.MarkerImage(eventMarkerImageSrc, eventMarkerImageSize);
+//       const eventMarker = new daum.maps.Marker({
+//           map: map,
+//           position: eventPositions[i].latlng,
+//           title : eventPositions[i].title,
+//           image : eventMarkerImage
+//       });
+//   }
+// }
+
+// requestTopicInfo(18).then(
+//   //data => console.log(data)
+// );
+
+// function requestTopicInfo(categoryId) {
+// //debugger;
 //   return new Promise(function(resolve, reject) {
 //     $.ajax({
-//       url: `https://api.meetup.com/${urlname}/events/${id}/hosts?&sign=true&photo-host=public`,
+//       url: `https://api.meetup.com/find/groups?photo-host=public&page=20&sig_id=271258437&category=+${categoryId}&fields=featured_photo&sig=d2b48db9d5d1ba847e34aab51fd0d8406dae2b62&key=17214911107c1b1a3412d223c7a111e&key=17214911107c1b1a3412d223c7a111e`,
 //       dataType: 'jsonp',
 //       success: function(data) {
+//         //debugger;
 //         resolve(data);
 //       },
 //       error: function(error) {
+//         //debugger;
 //         reject(error);
 //       },
 //     });
 //   })
 // }
 
-function markEventsOnMap(eventPositions) {
-  //debugger;
-
-  const eventMarkerImageSrc = "http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
-
-  for (let i = 0; i < eventPositions.length; i ++) {
-
-      const eventMarkerImageSize = new daum.maps.Size(24, 35);
-      const eventMarkerImage = new daum.maps.MarkerImage(eventMarkerImageSrc, eventMarkerImageSize);
-      const eventMarker = new daum.maps.Marker({
-          map: map,
-          position: eventPositions[i].latlng,
-          title : eventPositions[i].title,
-          image : eventMarkerImage
-      });
-  }
-}
 
 
-
-requestTopicInfo(18).then(
-  //data => console.log(data)
-);
-
-function requestTopicInfo(categoryId) {
-//debugger;
-  return new Promise(function(resolve, reject) {
-    $.ajax({
-      url: `https://api.meetup.com/find/groups?photo-host=public&page=20&sig_id=271258437&category=+${categoryId}&fields=featured_photo&sig=d2b48db9d5d1ba847e34aab51fd0d8406dae2b62&key=17214911107c1b1a3412d223c7a111e&key=17214911107c1b1a3412d223c7a111e`,
-      dataType: 'jsonp',
-      success: function(data) {
-        //debugger;
-        resolve(data);
-      },
-      error: function(error) {
-        //debugger;
-        reject(error);
-      },
-    });
-  })
-}
 
