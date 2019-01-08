@@ -27,17 +27,17 @@ footer {
     font-size: 30px;
     font-weight: 800;
     padding-left: 30px;
-    padding-top: 25px;
+    padding-top: 22px;
     color: rgb(246, 247, 231);
 }
 
 .subTitle {
     font-family: 'Exo', sans-serif;
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 100;
+    font-style: italic;
     padding-left: 30px;
     padding-top: 5px;
-    font-style: italic;
     color: #f6f7e7;
 }
 
@@ -56,6 +56,7 @@ footer {
     padding-bottom: 120px;
     width: 100%;
     background-color: rgba(250, 240, 225, 0.8);
+
     .event {
         font-family: 'Noto Sans KR', sans-serif;
         width: 500px;
@@ -83,14 +84,14 @@ footer {
     input {
         font-family: 'Noto Sans KR', sans-serif;
         font-weight: 700;
+        font-size: 17px;
+        text-align: center;
+        color: white;
         border: none;
         background-color: rgb(9, 6, 26);
-        color: white;
-        text-align: center;
         width: 100%;
         height: 50px;
         padding: 10px;
-        font-size: 17px;
     }
 }
 
@@ -113,6 +114,7 @@ footer {
 }
 
 .mapSearchButton {
+    cursor: pointer;
     position: relative;
     text-align: center;
     font-family: 'Oswald', sans-serif;
@@ -121,9 +123,8 @@ footer {
     width: 150px;
     left: 600px;
     top: -250px;
-    cursor: pointer;
-    color: #f6f7e7;
     padding-bottom: 5px;
+    color: #f6f7e7;
     background-color: rgba(0,0,0,0.8);
 }
 
@@ -140,13 +141,13 @@ footer {
 
 .rsvp{
     position: relative;
-    color: #fdfbee;
     top: -120px;
     left: 350px;
-    font-size: 17px;
-    background-color: rgba(0, 0, 0, 0.8);
     width: 150px;
     height: 25px;
+    font-size: 17px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
 }
 
 .hostWrapper {
@@ -173,14 +174,12 @@ footer {
     }
     .eventLink {
         font-family: 'Oswald', sans-serif;
-        text-decoration: none;
-        color: #202020;
         font-size: 12px;
+        text-decoration: none;
         margin-top: 30px;
         margin-right: -20px;
         border: 0.5px solid;
         padding: 1px 20px;
-        padding-bottom: 5px;
         color: gray;
     }
 }
@@ -209,18 +208,19 @@ footer {
 
 .bookmarkMenu {
     padding-top: 50px;
+
     .bookmarkShowButton, .bookmarkText {
-        font-family: 'Oswald', sans-serif;
         display: inline-block;
+        margin-left: 10px;
+        font-family: 'Oswald', sans-serif;
         font-size: 25px;
         font-weight: 600;
-        margin-left: 10px;
     }
 
     .bookmarkShowButton {
+        cursor: pointer;
         font-size: 25px;
         font-weight: 700;
-        cursor: pointer;
     }
 }
 
@@ -234,9 +234,9 @@ footer {
 
 .bookmarkList {
     display: flex;
-    overflow-x: scroll;
     width: 1200px;
     margin-top: 20px;
+    overflow-x: scroll;
     overflow: hidden;
 }
 
@@ -261,6 +261,7 @@ footer {
     height: 120px;
     border-radius: 6px;
 }
+
 .chosenEventTitle {
     text-align: center;
     color: rgb(78, 76, 76);
@@ -271,6 +272,7 @@ footer {
     font-size: 16px;
     font-weight: 600;
 }
+
 .chosenEvent {
     margin: 20px;
     height: 320px;
@@ -284,8 +286,8 @@ footer {
 .chosenEventUrl {
     text-align: center;
     width: 190px;
-    font-family: 'Oswald', sans-serif;
     text-decoration: none;
+    font-family: 'Oswald', sans-serif;
     font-size: 12px;
     margin-top: 60px;
     margin-left: 5px;
@@ -294,12 +296,13 @@ footer {
     padding-bottom: 5px;
     color: gray;
 }
+
 .deleteIcon {
-    font-size: 17px;
     position: relative;
     left: 190px;
     top: -10px;
     width: 20px;
+    font-size: 17px;
     cursor: pointer;
 }
 

@@ -24,13 +24,13 @@ const bookmarkShowButton = document.querySelector('.bookmarkShowButton');
 const bookmarkListWrapper = document.querySelector('.bookmarkListWrapper');
 const mapContainer = document.getElementById('map');
 const mapOption = {
-    center: new daum.maps.LatLng(37.503461, 127.022127),
-    level: 13
+  center: new daum.maps.LatLng(37.503461, 127.022127),
+  level: 13
 };
 const map = new daum.maps.Map(mapContainer, mapOption);
 const markerPosition = new daum.maps.LatLng(37.503461, 127.022127);
 const marker = new daum.maps.Marker({
-    position: markerPosition
+  position: markerPosition
 });
 const geocoder = new daum.maps.services.Geocoder();
 
@@ -38,7 +38,7 @@ const loadDaumMap = () => {
   resizeMap();
   relayout();
   marker.setMap(map);
-}
+};
 
 const resizeMap = () => {
   const mapContainer = document.getElementById('map');
@@ -46,18 +46,19 @@ const resizeMap = () => {
   mapContainer.style.width = '100%';
   mapContainer.style.height = '400px';
   mapContainer.style.display = 'inli-block';
-}
+};
 
 const relayout = () => {
   map.relayout();
-}
+};
 
-const showMapSearchingArea = () => {
+const showSearchingArea = () => {
   const searchingArea = document.querySelector('.search');
 
   searchingArea.style.display = 'flex';
   window.scrollTo({top: 600, behavior : 'smooth'});
-}
+  loadBookmarks();
+};
 
 daum.maps.event.addListener(map, 'click', (mouseEvent) => {
 
@@ -72,21 +73,21 @@ daum.maps.event.addListener(map, 'click', (mouseEvent) => {
 
   requestMeetingInfos(lat, lon).then(requestAdditionalInfos).catch((err) => {
     loadingPage.style.display = 'none';
-    alert(err)
+    alert(err);
   });
 });
 
-const showSearchedSpot = _.debounce( (event) => {
+const searchingWithInputValue = _.debounce((event) => {
   let inputKey = event.keyCode;
 
   if (inputKey === 13) {
-    geocoder.addressSearch(searchInput.value, viewSearchedMap);
+    geocoder.addressSearch(searchInput.value, showSearchedSpot);
   }
 }, 300);
 
-const viewSearchedMap = (result, status) => {
+const showSearchedSpot = (result, status) => {
 
- if (status === daum.maps.services.Status.OK) {
+  if (status === daum.maps.services.Status.OK) {
 
     const coords = new daum.maps.LatLng(result[0].y, result[0].x);
     const marker = new daum.maps.Marker({
@@ -103,23 +104,23 @@ const viewSearchedMap = (result, status) => {
 
     requestMeetingInfos(result[0].y, result[0].x).then(requestAdditionalInfos);
   }
-}
+};
 
 const requestMeetingInfos = (lat, lon) => {
 
-  return new Promise(function(resolve, reject) {
+  return new Promise((resolve, reject) => {
     $.ajax({
       url: `https://api.meetup.com/find/upcoming_events?photo-host=public&page=50&sig_id=271258437&fields=featured_photo&lon=${lon}&lat=${lat}&sig=81be475c66b00480489c434302f8880add213a8c&key=17214911107c1b1a3412d223c7a111e`,
       dataType: 'jsonp',
-      success: function(data) {
+      success: (data) => {
         resolve(data);
       },
-      error: function(error) {
+      error: (error) => {
         reject(error);
       },
     });
-  })
-}
+  });
+};
 
 const requestAdditionalInfos = (data) => {
 
@@ -134,7 +135,7 @@ const requestAdditionalInfos = (data) => {
 
   events.forEach((event) => {
     const requestHostInfo = (id, urlname) => {
-      return new Promise(function(resolve, reject) {
+      return new Promise((resolve, reject) => {
 
         $.ajax({
           url: `https://api.meetup.com/${urlname}/events/${id}/hosts?&sign=true&photo-host=public`,
@@ -147,19 +148,19 @@ const requestAdditionalInfos = (data) => {
           },
         });
       });
-    }
+    };
 
     let hostInfo = requestHostInfo(event.id, event.group.urlname);
     hostInfos.push(hostInfo);
   });
 
-  Promise.all(hostInfos).then(showMeetingEvents).catch((err) => {
+  Promise.all(hostInfos).then(removeRemainingEvents).catch((err) => {
     loadingPage.style.display = 'none';
     alert(err);
   });
-}
+};
 
-const showMeetingEvents = (data) => {
+const removeRemainingEvents = (data) => {
   hostInformations = data;
   results = document.querySelector('.results');
 
@@ -170,7 +171,7 @@ const showMeetingEvents = (data) => {
   }
 
   makeEventLists();
-}
+};
 
 const makeEventLists = () => {
   let numberOfList = 10;
@@ -220,7 +221,7 @@ const makeEventLists = () => {
     eventLink.textContent = 'Join Event';
     eventLink.href = events[j].link;
 
-    if(events[j].featured_photo) {
+    if (events[j].featured_photo) {
       meetingImg.src = events[j].featured_photo.photo_link;
     } else {
       meetingImg.src = "https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80";
@@ -246,15 +247,15 @@ const makeEventLists = () => {
 
   loadingPage.style.display = 'none';
   window.scrollTo({top: 1500, behavior : 'smooth'});
-}
+};
 
 const loadBookmarks = () => {
   if (bookmarksinStorage) {
-    showBookmarks(0);
+    makeBookmark(0);
   }
 
   bookmarkListDragger();
-}
+};
 
 const bookmarkListDragger = () => {
   let pressing = false;
@@ -262,25 +263,25 @@ const bookmarkListDragger = () => {
   let scrollLeft;
 
   bookmarkList.addEventListener('mousedown', (event) => {
-      pressing = true;
-      bookmarkList.classList.add('active');
-      startX = event.pageX - bookmarkList.offsetLeft;
-      scrollLeft = bookmarkList.scrollLeft;
+    pressing = true;
+    bookmarkList.classList.add('active');
+    startX = event.pageX - bookmarkList.offsetLeft;
+    scrollLeft = bookmarkList.scrollLeft;
   });
 
   bookmarkList.addEventListener('mouseleave', () => {
-      pressing = false;
-      bookmarkList.classList.remove('active');
+    pressing = false;
+    bookmarkList.classList.remove('active');
   });
 
   bookmarkList.addEventListener('mouseup', () => {
-      pressing = false;
-      bookmarkList.classList.remove('active');
+    pressing = false;
+    bookmarkList.classList.remove('active');
   });
 
   bookmarkList.addEventListener('mousemove', (event) => {
-    const x = event.pageX - bookmarkList.offsetLeft;
-    const moving = (x - startX) * 3;
+    let x = event.pageX - bookmarkList.offsetLeft;
+    let moving = (x - startX) * 3;
 
     if (!pressing) {
       return;
@@ -289,12 +290,12 @@ const bookmarkListDragger = () => {
     event.preventDefault();
     bookmarkList.scrollLeft = scrollLeft - moving;
   });
-}
+};
 
 const addInBookmark = (event) => {
 
   const selectedArea = event.currentTarget.parentNode.parentNode;
-  const selectedEventName = selectedArea.children[2].children[0].innerText
+  const selectedEventName = selectedArea.children[2].children[0].innerText;
   const selectedEventImg = selectedArea.children[0].children[0].getAttribute('src');
   const selectedEventUrl = selectedArea.children[2].children[3].getAttribute('href');
   const bookMark = {'eventName' : selectedEventName, 'eventImg' : selectedEventImg, 'eventUrl' : selectedEventUrl};
@@ -321,12 +322,12 @@ const addInBookmark = (event) => {
   if (!saved) {
     bookMarks.push(bookMark);
     localStorage.setItem("bookMark", JSON.stringify(bookMarks));
-    showBookmarks(bookMarkLength);
+    makeBookmark(bookMarkLength);
   }
-}
+};
 
-const showBookmarks = (selectedbookMark) => {
-  const bookmarkStorage = document.querySelector('.bookmarkList')
+const makeBookmark = (selectedbookMark) => {
+  const bookmarkStorage = document.querySelector('.bookmarkList');
   let chosenEvents = JSON.parse(localStorage.getItem('bookMark'));
   let newBookmarkIndex;
 
@@ -362,7 +363,7 @@ const showBookmarks = (selectedbookMark) => {
 
     deleteIcon.addEventListener('click', deleteMarkedEvent);
   }
-}
+};
 
 const deleteMarkedEvent = (event) => {
   let chosenBookmarkEvent = event.target.parentNode.children[2].innerText;
@@ -376,9 +377,9 @@ const deleteMarkedEvent = (event) => {
 
   event.target.parentNode.remove();
   localStorage.setItem('bookMark', JSON.stringify(allBookmarks));
-}
+};
 
-const concealBookmark = (event) => {
+const controlBookmarkVisibility = (event) => {
   bookmarkListWrapper.classList.toggle('visible');
 
   if (bookmarkListWrapper.classList.contains('visible')) {
@@ -386,11 +387,9 @@ const concealBookmark = (event) => {
   } else {
     event.target.innerHTML = '∨';
   }
-}
+};
 
 loadDaumMap();
-loadBookmarks();
-
-mapSearchButton.addEventListener('click', showMapSearchingArea);
-searchInput.addEventListener('keydown', showSearchedSpot);
-bookmarkShowButton.addEventListener('click', concealBookmark);
+mapSearchButton.addEventListener('click', showSearchingArea);
+searchInput.addEventListener('keydown', searchingWithInputValue);
+bookmarkShowButton.addEventListener('click', controlBookmarkVisibility);
