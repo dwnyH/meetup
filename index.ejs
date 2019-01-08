@@ -9,33 +9,41 @@
     <link href="https://fonts.googleapis.com/css?family=Oswald" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Mukta" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Exo" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
 </head>
 <body>
     <header>
-        <div class = 'title'> Meet Up </div>
-        <div class = 'subTitle'> We are what we do </div>
+        <div class='title'> Meet Up </div>
+        <div class='subTitle'> We are what we do </div>
     </header>
-    <div class = 'categories'></div>
+    <div class = 'loadingPage'>
+        <div class = 'loader'></div>
+    </div>
     <div class = 'main'>
-        <div class = 'mapSearch'>Discover Events Happening Around You</div>
-        <div class = 'mapSearchButton'>search start</div>
-        <div class = 'search'>
+        <div class='mapSearch'>
+            <div class='mapSearchText'>
+                Discover Events Happening Around You
+            </div>
+        </div>
+        <div class='mapSearchButton'>search start</div>
+        <div class='search'>
             <input class='address' type='text' placeholder='도시를 입력하거나, 원하는 지역을 클릭하세요.'></input>
             <div id='map'></div>
-            <div class = 'bookmarks'>
-                <div class = 'bookmarkMenu'>
-                    <div class = 'bookmarkText'>book marks</div>
-                    <div class = 'bookmarkShowButton'>∨</div>
+            <div class='bookmarks'>
+                <div class='bookmarkMenu'>
+                    <div class='bookmarkText'>book marks</div>
+                    <div class='bookmarkShowButton'>∨</div>
                 </div>
-                <div class = 'bookmarkListWrapper'>
-                    <span class = 'savedText'>saved events</span>
-                    <div class = 'bookmarkList'></div>
+                <div class='bookmarkListWrapper'>
+                    <span class='savedText'>saved events</span>
+                    <div class='bookmarkList'></div>
                 </div>
             </div>
-            <div class = 'results'></div>
+            <div class='results'></div>
         </div>
     </div>
+
     <footer></footer>
 
 </body>

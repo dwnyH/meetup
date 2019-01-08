@@ -11,12 +11,12 @@ import { debounce } from 'lodash';
 
 let lat;
 let lon;
-let eventPositions = [];
 let hostInfos = [];
 let results;
 let hostInformations;
 let events;
 const mapSearchButton = document.querySelector('.mapSearchButton');
+const loadingPage = document.querySelector('.loadingPage');
 const bookmarkList = document.querySelector('.bookmarkList');
 const bookmarksinStorage = JSON.parse(localStorage.getItem('bookMark'));
 const searchInput = document.querySelector('.address');
@@ -34,105 +34,55 @@ const marker = new daum.maps.Marker({
 });
 const geocoder = new daum.maps.services.Geocoder();
 
-function loadDaumMap() {
+const loadDaumMap = () => {
   resizeMap();
   relayout();
   marker.setMap(map);
 }
 
-function showMapSearchingArea() {
-  const searchingArea = document.querySelector('.search');
-  searchingArea.style.display = 'flex';
-}
-
-function resizeMap() {
+const resizeMap = () => {
   const mapContainer = document.getElementById('map');
+
   mapContainer.style.width = '100%';
   mapContainer.style.height = '400px';
   mapContainer.style.display = 'inli-block';
 }
 
-function relayout() {
+const relayout = () => {
   map.relayout();
 }
 
-daum.maps.event.addListener(map, 'click', function(mouseEvent) {
+const showMapSearchingArea = () => {
+  const searchingArea = document.querySelector('.search');
+  searchingArea.style.display = 'flex';
+  window.scrollTo({top: 600, behavior : 'smooth'});
+}
+
+daum.maps.event.addListener(map, 'click', (mouseEvent) => {
 
   const latlng = mouseEvent.latLng;
   marker.setPosition(latlng);
 
   lat = latlng.getLat();
   lon = latlng.getLng();
-  console.log(lat, lon);
-  requestMeetingInfos(lat, lon).then(requestAdditionalInfos);
+
+  loadingPage.style.display = 'flex';
+
+  requestMeetingInfos(lat, lon).then(requestAdditionalInfos).catch(err => alert(err));
 });
 
-function requestMeetingInfos(lat, lon) {
-  return new Promise(function(resolve, reject) {
-    $.ajax({
-      url: `https://api.meetup.com/find/upcoming_events?photo-host=public&page=50&sig_id=271258437&fields=featured_photo&lon=${lon}&lat=${lat}&sig=81be475c66b00480489c434302f8880add213a8c&key=17214911107c1b1a3412d223c7a111e`,
-      dataType: 'jsonp',
-      success: function(data) {
-        resolve(data);
-      },
-      error: function(error) {
-        reject(error);
-      },
-    });
-  })
-}
-
-function loadBookmarks() {
-  if (bookmarksinStorage) {
-    showBookmarks(0);
+const showSearchedSpot = _.debounce( (event) => {
+  let inputKey = event.keyCode;
+  if (inputKey === 13) {
+    geocoder.addressSearch(searchInput.value, viewSearchedMap);
   }
-  bookmarkListDragger();
-}
+}, 300);
 
-function bookmarkListDragger() {
-  let isDown = false;
-  let startX;
-  let scrollLeft;
+const viewSearchedMap = (result, status) => {
 
-  bookmarkList.addEventListener('mousedown', (event) => {
-      isDown = true;
-      bookmarkList.classList.add('active');
-      startX = event.pageX - bookmarkList.offsetLeft;
-      scrollLeft = bookmarkList.scrollLeft;
-  });
+ if (status === daum.maps.services.Status.OK) {
 
-  bookmarkList.addEventListener('mouseleave', () => {
-      isDown = false;
-      bookmarkList.classList.remove('active');
-  });
-
-  bookmarkList.addEventListener('mouseup', () => {
-      isDown = false;
-      bookmarkList.classList.remove('active');
-  });
-
-  bookmarkList.addEventListener('mousemove', (event) => {
-    if (!isDown) {
-      return;
-    }
-    const x = event.pageX - bookmarkList.offsetLeft;
-    const walk = (x - startX) * 3;
-    event.preventDefault();
-    bookmarkList.scrollLeft = scrollLeft - walk;
-  });
-}
-
-const showSearchedSpot = _.debounce(
-  function (event) {
-    let inputKey = event.keyCode;
-    if (inputKey === 13) {
-      geocoder.addressSearch(searchInput.value, viewMap);
-    }
-  }, 300);
-
-function viewMap(result, status) {
-
-   if (status === daum.maps.services.Status.OK) {
+    loadingPage.style.display = 'flex';
 
     const coords = new daum.maps.LatLng(result[0].y, result[0].x);
     const marker = new daum.maps.Marker({
@@ -150,50 +100,79 @@ function viewMap(result, status) {
   }
 }
 
-function requestAdditionalInfos(data) {
-  debugger;
+const requestMeetingInfos = (lat, lon) => {
+  return new Promise(function(resolve, reject) {
+    $.ajax({
+      url: `https://api.meetup.com/find/upcoming_events?photo-host=public&page=50&sig_id=271258437&fields=featured_photo&lon=${lon}&lat=${lat}&sig=81be475c66b00480489c434302f8880add213a8c&key=17214911107c1b1a3412d223c7a111e`,
+      dataType: 'jsonp',
+      success: function(data) {
+        resolve(data);
+      },
+      error: function(error) {
+        reject(error);
+      },
+    });
+  })
+}
+
+const requestAdditionalInfos = (data) => {
+
   events = data.data.events;
   hostInfos = [];
 
-  events.forEach(function(event) {
-    let hostInfo = requestHostInfo(event.id, event.group.urlname);
+  if (!events.length) {
+    alert('찾으시는 장소 근처에 모임이 없습니다.');
+    loadingPage.style.display = 'none';
+    return;
+  }
 
-    function requestHostInfo(id, urlname) {
+  events.forEach((event) => {
+    debugger;
+    const requestHostInfo = (id, urlname) => {
       return new Promise(function(resolve, reject) {
 
         $.ajax({
           url: `https://api.meetup.com/${urlname}/events/${id}/hosts?&sign=true&photo-host=public`,
           dataType: 'jsonp',
-          success: function(data) {
+          success: (data) => {
             resolve(data);
           },
-          error: function(error) {
+          error: (error) => {
             reject(error);
           },
         });
       });
     }
+
+    let hostInfo = requestHostInfo(event.id, event.group.urlname);
     hostInfos.push(hostInfo);
   });
 
-  Promise.all(hostInfos).then(showMeetingEvents).catch(err => console.log(err));
-  //markEventsOnMap(eventPositions);
-
-  function showMeetingEvents(data) {
-    hostInformations = data;
-    results = document.querySelector('.results');
-    debugger;
-    if (results.hasChildNodes()) {
-      while (results.firstChild) {
-        results.removeChild(results.firstChild);
-      }
-    }
-    makeEventLists();
-  }
+  Promise.all(hostInfos).then(showMeetingEvents).catch((err) => alert(err));
 }
 
-function makeEventLists() {
-  for (let j = 0; j < 10; j++) {
+const showMeetingEvents = (data) => {
+  hostInformations = data;
+  results = document.querySelector('.results');
+
+  if (results.hasChildNodes()) {
+    while (results.firstChild) {
+      results.removeChild(results.firstChild);
+    }
+  }
+
+  makeEventLists();
+}
+
+const makeEventLists = () => {
+
+  let numberOfList = 10;
+
+  if (events.length <= 10) {
+    numberOfList = events.length;
+  }
+
+  for (let j = 0; j < numberOfList; j++) {
 
     let eventList = document.createElement('div');
     let eventName = document.createElement('div');
@@ -251,10 +230,54 @@ function makeEventLists() {
     eventList.appendChild(contentWrapper);
     results.appendChild(eventList);
   }
+
+  loadingPage.style.display = 'none';
 }
 
-function addInBookmark(event) {
-  debugger;
+const loadBookmarks = () => {
+  if (bookmarksinStorage) {
+    showBookmarks(0);
+  }
+
+  bookmarkListDragger();
+}
+
+const bookmarkListDragger = () => {
+  let pressing = false;
+  let startX;
+  let scrollLeft;
+
+  bookmarkList.addEventListener('mousedown', (event) => {
+      pressing = true;
+      bookmarkList.classList.add('active');
+      startX = event.pageX - bookmarkList.offsetLeft;
+      scrollLeft = bookmarkList.scrollLeft;
+  });
+
+  bookmarkList.addEventListener('mouseleave', () => {
+      pressing = false;
+      bookmarkList.classList.remove('active');
+  });
+
+  bookmarkList.addEventListener('mouseup', () => {
+      pressing = false;
+      bookmarkList.classList.remove('active');
+  });
+
+  bookmarkList.addEventListener('mousemove', (event) => {
+    const x = event.pageX - bookmarkList.offsetLeft;
+    const moving = (x - startX) * 3;
+
+    if (!pressing) {
+      return;
+    }
+
+    event.preventDefault();
+    bookmarkList.scrollLeft = scrollLeft - moving;
+  });
+}
+
+const addInBookmark = (event) => {
   event.currentTarget.classList.toggle('marked');
   const selectedArea = event.currentTarget.parentNode.parentNode;
   const selectedEventName = selectedArea.children[2].children[0].innerText
@@ -285,7 +308,7 @@ function addInBookmark(event) {
   }
 }
 
-function showBookmarks(selectedbookMark) {
+const showBookmarks = (selectedbookMark) => {
   const bookmarkStorage = document.querySelector('.bookmarkList')
   let chosenEvents = JSON.parse(localStorage.getItem('bookMark'));
   let newBookmarkIndex;
@@ -301,7 +324,6 @@ function showBookmarks(selectedbookMark) {
     let chosenEventImg = document.createElement('img');
     let chosenEventTitle = document.createElement('div');
     let deleteIcon = document.createElement('div');
-    // let chosenEventhostImg = document.createElement('img');
 
     chosenEvent.classList.add('chosenEvent');
     chosenEventImg.classList.add('chosenEventImg');
@@ -310,8 +332,7 @@ function showBookmarks(selectedbookMark) {
     chosenEventTitle.textContent = chosenEvents[i].eventName;
     deleteIcon.classList.add('deleteIcon');
     deleteIcon.textContent = 'x';
-    // chosenEventhostImg.classList.add('chosenEventhostImg');
-    // chosenEventhostImg.src = chosenEvents[i].eventImg;
+
     chosenEvent.appendChild(deleteIcon);
     chosenEvent.appendChild(chosenEventImg);
     chosenEvent.appendChild(chosenEventTitle);
@@ -321,8 +342,8 @@ function showBookmarks(selectedbookMark) {
   }
 }
 
-function deleteMarkedEvent(event) {
-  debugger;
+const deleteMarkedEvent = (event) => {
+
   let chosenBookmarkEvent = event.target.parentNode.children[2].innerText;
   let allBookmarks = JSON.parse(localStorage.getItem('bookMark'));
 
@@ -336,8 +357,9 @@ function deleteMarkedEvent(event) {
   localStorage.setItem('bookMark', JSON.stringify(allBookmarks));
 }
 
-function concealBookmark(event) {
+const concealBookmark = (event) => {
   bookmarkListWrapper.classList.toggle('visible');
+
   if (bookmarkListWrapper.classList.contains('visible')) {
     event.target.innerHTML = '∧';
   } else {
@@ -347,6 +369,7 @@ function concealBookmark(event) {
 
 loadDaumMap();
 loadBookmarks();
+
 mapSearchButton.addEventListener('click', showMapSearchingArea);
 searchInput.addEventListener('keydown', showSearchedSpot);
 bookmarkShowButton.addEventListener('click', concealBookmark);

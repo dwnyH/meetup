@@ -49,15 +49,16 @@ footer {
     grid-template-columns: repeat(2, 1fr);
     justify-items: center;
     grid-gap: 10px;
-    margin-top: 200px;
+    margin-top: 120px;
     width: 100%;
-    background-color: rgb(255, 251, 246);
+    background-color: rgba(250, 240, 225, 0.8);
     .event {
         font-family: 'Noto Sans KR', sans-serif;
         width: 500px;
         padding-top: 30px;
         padding-bottom: 30px;
         margin: 10px;
+        background-color: rgb(255, 249, 249);
     }
 }
 
@@ -70,31 +71,39 @@ footer {
 }
 
 .search {
-    //height: 0;
-    //background-color: #1f1f21;
     display: none;
     flex-direction: column;
     align-items: center;
     input {
+        font-family: 'Noto Sans KR', sans-serif;
+        font-weight: 700;
+        border: none;
+        background-color: rgb(9, 6, 26);
+        color: white;
         text-align: center;
         width: 100%;
-        height: 40px;
-        margin-bottom: 20px;
+        height: 50px;
+        padding: 10px;
+        font-size: 17px;
     }
 }
 
 .mapSearch {
     height: 500px;
+    margin-top: 40px;
     text-align: center;
-    font-family: 'Oswald', sans-serif;
-    font-size: 40px;
-    font-weight: 800;
     padding-left: 30px;
     padding-top: 150px;
-    color: white;
     background-image: url(https://images.unsplash.com/photo-1517456793572-1d8efd6dc135?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1050&q=80);
     background-position-y: center;
-    filter: grayscale(50%);
+    filter: grayscale(10%);
+}
+
+.mapSearch > .mapSearchText {
+    color: rgb(250, 247, 233);
+    font-family: 'Exo', sans-serif;
+    font-size: 45px;
+    font-weight: 800;
 }
 
 .mapSearchButton {
@@ -112,12 +121,6 @@ footer {
     background-color: rgba(0,0,0,0.8);
 }
 
-
-// input {
-//     height: 40px;
-//     margin-bottom: 20px;
-//     //border: none;
-// }
 .meetingImg {
     width: 500px;
     height: 300px;
@@ -149,6 +152,7 @@ footer {
 .contentWrapper {
     display: inline-block;
     width : 300px;
+    padding-right: 15px;
 
     .eventName {
         font-weight: bold;
@@ -167,7 +171,7 @@ footer {
     font-size: 45px;
     top: -300px;
     left: 220px;
-    color: rgba(230, 225, 202, 0.8);
+    color: rgba(129, 129, 127, 0.7);
 }
 
 .markIcon :hover {
@@ -175,7 +179,7 @@ footer {
 }
 
 .marked {
-    color: rgb(228, 216, 107);
+    color: rgb(211, 176, 20);
 }
 
 .bookmarks {
@@ -265,3 +269,32 @@ footer {
     cursor: pointer;
 }
 
+.loader {
+    display: inline-block;
+    width: 120px;
+    height: 120px;
+    border: 16px solid rgb(252, 235, 214);
+    border-top: 16px solid rgb(240, 176, 74);
+    border-radius: 50%;
+    animation: spin 2s linear infinite;
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+}
+
+
+.loadingPage {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+}
