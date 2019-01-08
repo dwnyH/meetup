@@ -6,6 +6,7 @@ html, body{
     margin: 0;
     padding: 0;
 }
+
 *, *:before, *:after {
     box-sizing: inherit;
 }
@@ -26,13 +27,13 @@ footer {
     font-size: 30px;
     font-weight: 800;
     padding-left: 30px;
-    padding-top: 20px;
+    padding-top: 25px;
     color: rgb(246, 247, 231);
 }
 
 .subTitle {
-    font-family: 'Oswald', sans-serif;
-    font-size: 20px;
+    font-family: 'Exo', sans-serif;
+    font-size: 15px;
     font-weight: 100;
     padding-left: 30px;
     padding-top: 5px;
@@ -45,20 +46,24 @@ footer {
 }
 
 .results {
+    cursor: pointer;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     justify-items: center;
     grid-gap: 10px;
     margin-top: 120px;
+    padding-top: 120px;
+    padding-bottom: 120px;
     width: 100%;
     background-color: rgba(250, 240, 225, 0.8);
     .event {
         font-family: 'Noto Sans KR', sans-serif;
         width: 500px;
+        height: 530px;
         padding-top: 30px;
-        padding-bottom: 30px;
+        padding-bottom: 10px;
         margin: 10px;
-        background-color: rgb(255, 249, 249);
+        background-color: #fff9f9;
     }
 }
 
@@ -74,6 +79,7 @@ footer {
     display: none;
     flex-direction: column;
     align-items: center;
+
     input {
         font-family: 'Noto Sans KR', sans-serif;
         font-weight: 700;
@@ -157,12 +163,25 @@ footer {
     .eventName {
         font-weight: bold;
     }
+    .eventName, .eventDate, .groupName {
+        padding-bottom: 3px;
+    }
     .eventDate {
         font-size: 15px;
         font-weight: 600;
+        margin-bottom: 10px;
     }
-    .eventName, .eventDate, .groupName {
-        padding-bottom: 3px;
+    .eventLink {
+        font-family: 'Oswald', sans-serif;
+        text-decoration: none;
+        color: #202020;
+        font-size: 12px;
+        margin-top: 30px;
+        margin-right: -20px;
+        border: 0.5px solid;
+        padding: 1px 20px;
+        padding-bottom: 5px;
+        color: gray;
     }
 }
 
@@ -247,6 +266,7 @@ footer {
     color: rgb(78, 76, 76);
     padding-top: 25px;
     padding-left: 3px;
+    padding-bottom: 15px;
     font-family: 'Mukta', sans-serif;
     font-size: 16px;
     font-weight: 600;
@@ -259,6 +279,20 @@ footer {
     padding: 10px;
     border-radius: 5px;
     box-shadow: 1px 1px 10px 2px #e9e8e8;
+}
+
+.chosenEventUrl {
+    text-align: center;
+    width: 190px;
+    font-family: 'Oswald', sans-serif;
+    text-decoration: none;
+    font-size: 12px;
+    margin-top: 60px;
+    margin-left: 5px;
+    border: 0.5px solid;
+    padding: 1px 10px;
+    padding-bottom: 5px;
+    color: gray;
 }
 .deleteIcon {
     font-size: 17px;

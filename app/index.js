@@ -54,6 +54,7 @@ const relayout = () => {
 
 const showMapSearchingArea = () => {
   const searchingArea = document.querySelector('.search');
+
   searchingArea.style.display = 'flex';
   window.scrollTo({top: 600, behavior : 'smooth'});
 }
@@ -61,6 +62,7 @@ const showMapSearchingArea = () => {
 daum.maps.event.addListener(map, 'click', (mouseEvent) => {
 
   const latlng = mouseEvent.latLng;
+
   marker.setPosition(latlng);
 
   lat = latlng.getLat();
@@ -68,11 +70,15 @@ daum.maps.event.addListener(map, 'click', (mouseEvent) => {
 
   loadingPage.style.display = 'flex';
 
-  requestMeetingInfos(lat, lon).then(requestAdditionalInfos).catch(err => alert(err));
+  requestMeetingInfos(lat, lon).then(requestAdditionalInfos).catch((err) => {
+    loadingPage.style.display = 'none';
+    alert(err)
+  });
 });
 
 const showSearchedSpot = _.debounce( (event) => {
   let inputKey = event.keyCode;
+
   if (inputKey === 13) {
     geocoder.addressSearch(searchInput.value, viewSearchedMap);
   }
@@ -81,8 +87,6 @@ const showSearchedSpot = _.debounce( (event) => {
 const viewSearchedMap = (result, status) => {
 
  if (status === daum.maps.services.Status.OK) {
-
-    loadingPage.style.display = 'flex';
 
     const coords = new daum.maps.LatLng(result[0].y, result[0].x);
     const marker = new daum.maps.Marker({
@@ -93,6 +97,7 @@ const viewSearchedMap = (result, status) => {
       content: `<div style="width:150px;text-align:center;padding:6px 0;">${searchInput.value}</div>`
     });
 
+    loadingPage.style.display = 'flex';
     infowindow.open(map, marker);
     map.setCenter(coords);
 
@@ -101,6 +106,7 @@ const viewSearchedMap = (result, status) => {
 }
 
 const requestMeetingInfos = (lat, lon) => {
+
   return new Promise(function(resolve, reject) {
     $.ajax({
       url: `https://api.meetup.com/find/upcoming_events?photo-host=public&page=50&sig_id=271258437&fields=featured_photo&lon=${lon}&lat=${lat}&sig=81be475c66b00480489c434302f8880add213a8c&key=17214911107c1b1a3412d223c7a111e`,
@@ -127,7 +133,6 @@ const requestAdditionalInfos = (data) => {
   }
 
   events.forEach((event) => {
-    debugger;
     const requestHostInfo = (id, urlname) => {
       return new Promise(function(resolve, reject) {
 
@@ -148,7 +153,10 @@ const requestAdditionalInfos = (data) => {
     hostInfos.push(hostInfo);
   });
 
-  Promise.all(hostInfos).then(showMeetingEvents).catch((err) => alert(err));
+  Promise.all(hostInfos).then(showMeetingEvents).catch((err) => {
+    loadingPage.style.display = 'none';
+    alert(err);
+  });
 }
 
 const showMeetingEvents = (data) => {
@@ -165,7 +173,6 @@ const showMeetingEvents = (data) => {
 }
 
 const makeEventLists = () => {
-
   let numberOfList = 10;
 
   if (events.length <= 10) {
@@ -187,6 +194,7 @@ const makeEventLists = () => {
     let hostWrapper = document.createElement('div');
     let bookMarkWrapper = document.createElement('span');
     let markIcon = '<i class="fas fa-bookmark"></i>';
+    let eventLink = document.createElement('a');
 
     eventList.classList.add('event');
     eventName.classList.add('eventName');
@@ -200,6 +208,7 @@ const makeEventLists = () => {
     contentWrapper.classList.add('contentWrapper');
     hostWrapper.classList.add('hostWrapper');
     bookMarkWrapper.classList.add('markIcon');
+    eventLink.classList.add('eventLink');
 
     eventName.textContent = events[j].name;
     groupName.textContent = events[j].group.name;
@@ -208,6 +217,8 @@ const makeEventLists = () => {
     hostName.textContent = hostInformations[j].data[0].name;
     hostImg.src = hostInformations[j].data[0].photo.photo_link;
     bookMarkWrapper.innerHTML = markIcon;
+    eventLink.textContent = 'Join Event';
+    eventLink.href = events[j].link;
 
     if(events[j].featured_photo) {
       meetingImg.src = events[j].featured_photo.photo_link;
@@ -225,13 +236,16 @@ const makeEventLists = () => {
     contentWrapper.appendChild(eventName);
     contentWrapper.appendChild(groupName);
     contentWrapper.appendChild(eventDate);
+    contentWrapper.appendChild(eventLink);
     eventList.appendChild(imgWrapper);
     eventList.appendChild(hostWrapper);
     eventList.appendChild(contentWrapper);
     results.appendChild(eventList);
+    results.setAttribute('href', events[j].link);
   }
 
   loadingPage.style.display = 'none';
+  window.scrollTo({top: 1500, behavior : 'smooth'});
 }
 
 const loadBookmarks = () => {
@@ -278,14 +292,17 @@ const bookmarkListDragger = () => {
 }
 
 const addInBookmark = (event) => {
-  event.currentTarget.classList.toggle('marked');
+
   const selectedArea = event.currentTarget.parentNode.parentNode;
   const selectedEventName = selectedArea.children[2].children[0].innerText
   const selectedEventImg = selectedArea.children[0].children[0].getAttribute('src');
-  const bookMark = {'eventName' : selectedEventName, 'eventImg' : selectedEventImg};
+  const selectedEventUrl = selectedArea.children[2].children[3].getAttribute('href');
+  const bookMark = {'eventName' : selectedEventName, 'eventImg' : selectedEventImg, 'eventUrl' : selectedEventUrl};
   let bookMarks = JSON.parse(localStorage.getItem('bookMark'));
   let bookMarkLength;
   let saved = false;
+
+  event.currentTarget.classList.toggle('marked');
 
   if (!bookMarks) {
     bookMarks = [];
@@ -294,10 +311,10 @@ const addInBookmark = (event) => {
   }
 
   for (let i = 0; i < bookMarks.length; i++) {
-    if (bookMarks[i].eventName === selectedEventName) {
+    if (bookMarks[i].eventUrl === selectedEventUrl) {
       alert('저장된 이벤트입니다 :)');
       saved = true;
-      event.currentTarget.classList.remove('marked');
+      event.currentTarget.classList.add('marked');
     }
   }
 
@@ -323,6 +340,7 @@ const showBookmarks = (selectedbookMark) => {
     let chosenEvent = document.createElement('div');
     let chosenEventImg = document.createElement('img');
     let chosenEventTitle = document.createElement('div');
+    let chosenEventUrl = document.createElement('a');
     let deleteIcon = document.createElement('div');
 
     chosenEvent.classList.add('chosenEvent');
@@ -330,12 +348,16 @@ const showBookmarks = (selectedbookMark) => {
     chosenEventImg.src = chosenEvents[i].eventImg;
     chosenEventTitle.classList.add('chosenEventTitle');
     chosenEventTitle.textContent = chosenEvents[i].eventName;
+    chosenEventUrl.textContent = 'Join Event';
+    chosenEventUrl.href = chosenEvents[i].eventUrl;
+    chosenEventUrl.classList.add('chosenEventUrl');
     deleteIcon.classList.add('deleteIcon');
     deleteIcon.textContent = 'x';
 
     chosenEvent.appendChild(deleteIcon);
     chosenEvent.appendChild(chosenEventImg);
     chosenEvent.appendChild(chosenEventTitle);
+    chosenEvent.appendChild(chosenEventUrl);
     bookmarkStorage.appendChild(chosenEvent);
 
     deleteIcon.addEventListener('click', deleteMarkedEvent);
@@ -343,7 +365,6 @@ const showBookmarks = (selectedbookMark) => {
 }
 
 const deleteMarkedEvent = (event) => {
-
   let chosenBookmarkEvent = event.target.parentNode.children[2].innerText;
   let allBookmarks = JSON.parse(localStorage.getItem('bookMark'));
 
@@ -373,47 +394,3 @@ loadBookmarks();
 mapSearchButton.addEventListener('click', showMapSearchingArea);
 searchInput.addEventListener('keydown', showSearchedSpot);
 bookmarkShowButton.addEventListener('click', concealBookmark);
-
-// function markEventsOnMap(eventPositions) {
-//   //debugger;
-
-//   const eventMarkerImageSrc = "http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
-
-//   for (let i = 0; i < eventPositions.length; i ++) {
-
-//       const eventMarkerImageSize = new daum.maps.Size(24, 35);
-//       const eventMarkerImage = new daum.maps.MarkerImage(eventMarkerImageSrc, eventMarkerImageSize);
-//       const eventMarker = new daum.maps.Marker({
-//           map: map,
-//           position: eventPositions[i].latlng,
-//           title : eventPositions[i].title,
-//           image : eventMarkerImage
-//       });
-//   }
-// }
-
-// requestTopicInfo(18).then(
-//   //data => console.log(data)
-// );
-
-// function requestTopicInfo(categoryId) {
-// //debugger;
-//   return new Promise(function(resolve, reject) {
-//     $.ajax({
-//       url: `https://api.meetup.com/find/groups?photo-host=public&page=20&sig_id=271258437&category=+${categoryId}&fields=featured_photo&sig=d2b48db9d5d1ba847e34aab51fd0d8406dae2b62&key=17214911107c1b1a3412d223c7a111e&key=17214911107c1b1a3412d223c7a111e`,
-//       dataType: 'jsonp',
-//       success: function(data) {
-//         //debugger;
-//         resolve(data);
-//       },
-//       error: function(error) {
-//         //debugger;
-//         reject(error);
-//       },
-//     });
-//   })
-// }
-
-
-
-
