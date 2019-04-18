@@ -1,6 +1,8 @@
 # Meet-up
 Meet-up API와 다음 지도를 이용한, 지역기반 모임 웹 어플리케이션입니다.
 
+![preview](https://github.com/hiiiii11/meetup/blob/master/assets/images/2nd%20test%20%ED%99%A9%EB%8B%A4%EC%9A%B4.gif)
+
 ## Setup
 
 Install dependencies
