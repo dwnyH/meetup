@@ -1,4 +1,4 @@
-#Meet-up
+# Meet-up
 Meet-up API와 다음 지도를 이용한, 지역기반 모임 웹 어플리케이션입니다.
 
 ## Setup
